@@ -1,0 +1,6 @@
+output/
+wandb/
+**/.vscode/
+**/.DS_Store/
+**/__pycache__
+*.json
