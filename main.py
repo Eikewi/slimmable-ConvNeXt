@@ -93,6 +93,8 @@ def get_args_parser():
                         help="Find the best parameters for slimming; Works only in combination with eval only")
     parser.add_argument('--calc_mmac', type=str2bool, default=False, 
                         help="Calculate the mmacs (not yet implemented)")
+    parser.add_argument('--autoslim_base', type=str2bool, default=False, 
+                        help="start the autoslim base training (training with random p-lists)")
 
     # EMA related parameters
     parser.add_argument('--model_ema', type=str2bool, default=False)
@@ -546,6 +548,10 @@ def main(args):
         max_accuracy_ema = 0.0
 
     print("Start training for %d epochs" % args.epochs)
+
+    if args.autoslim_base:
+        print("AutoSlim base model training activated. Trains on random p_lists.")
+        
     start_time = time.time()
 
     for epoch in range(args.start_epoch, args.epochs):
@@ -562,7 +568,7 @@ def main(args):
             log_writer=log_writer, wandb_logger=wandb_logger, start_steps=epoch * num_training_steps_per_epoch,
             lr_schedule_values=lr_schedule_values, wd_schedule_values=wd_schedule_values,
             num_training_steps_per_epoch=num_training_steps_per_epoch, update_freq=args.update_freq,
-            use_amp=args.use_amp, p_list=args.p_list
+            use_amp=args.use_amp, autoslim_base=args.autoslim_base, p_list=args.p_list
         )
         if args.output_dir and args.save_ckpt:
             if (epoch + 1) % args.save_ckpt_freq == 0 or epoch + 1 == args.epochs:

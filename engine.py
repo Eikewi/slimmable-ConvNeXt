@@ -24,7 +24,7 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
                     device: torch.device, epoch: int, loss_scaler, max_norm: float = 0,
                     model_ema: Optional[ModelEma] = None, mixup_fn: Optional[Mixup] = None, log_writer=None,
                     wandb_logger=None, start_steps=None, lr_schedule_values=None, wd_schedule_values=None,
-                    num_training_steps_per_epoch=None, update_freq=None, use_amp=False, p_list=[[1]*36]):
+                    num_training_steps_per_epoch=None, update_freq=None, use_amp=False, autoslim_base=False, p_list=[[1]*36]):
     model.train(True)
     metric_logger = utils.MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -57,18 +57,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         if isinstance(p_list[0], list):
             p_list_1 = p_list[data_iter_step%len(p_list)]
 
-        #get a p_list with 18 random values
-        # p_list_1 = []
-        # for _ in range(0, 18): 
-        #     p_list_1.append(randint(1, 100)/100)
-
-        #print(p_list_1)
-
-        # # Get one list with 18 times the same random value
-        #p_list_1 = [randint(1, 100)/100]*18
-        #p_list_1 = [0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92, 0.92]
-
-        #print(p_list_1)
+        # Get one list with 36 times the same random value
+        if autoslim_base:
+            p_list_1 = [randint(1, 100)/100]*36
 
         if use_amp:
             with torch.cuda.amp.autocast():
